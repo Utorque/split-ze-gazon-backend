@@ -1,0 +1,45 @@
+# No version needed for modern Docker Compose
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: game_leaderboard_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: leaderboard
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    # Internal port still 3306, but not exposed to host
+    # ports:
+    #   - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  api:
+    build: ./api
+    container_name: game_leaderboard_api
+    restart: always
+    ports:
+      - "51201:8000"
+    # depends_on:
+    #   mariadb:
+    #     condition: service_healthy
+    environment:
+      - DB_HOST=mariadb
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=leaderboard
+    volumes:
+      - ./api:/app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+volumes:
+  db_data:
