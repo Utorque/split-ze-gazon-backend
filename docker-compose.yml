@@ -25,9 +25,9 @@ services:
     restart: always
     ports:
       - "51201:8000"
-    depends_on:
-      mariadb:
-        condition: service_healthy
+    # depends_on:
+    #   mariadb:
+    #     condition: service_healthy
     environment:
       - DB_HOST=mariadb
       - DB_USER=user
