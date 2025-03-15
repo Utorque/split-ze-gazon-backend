@@ -1,31 +1,17 @@
-FROM python:3.9-slim
-
-WORKDIR /app
-
-# Install MariaDB client for health checks
-RUN apt-get update && apt-get install -y default-mysql-client && apt-get clean
+FROM mariadb:latest
 
 # Copy database initialization script
 COPY init.sql /docker-entrypoint-initdb.d/init.sql
 
-# Copy API code
-COPY api/ /app/
+# Set default environment variables
+ENV MYSQL_ROOT_PASSWORD=rootpassword
+ENV MYSQL_DATABASE=leaderboard
+ENV MYSQL_USER=user
+ENV MYSQL_PASSWORD=password
 
-# Install API dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Expose the MariaDB port
+EXPOSE 3306
 
-# Create a startup script
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
-
-# Set environment variables
-ENV DB_HOST=localhost
-ENV DB_USER=user
-ENV DB_PASSWORD=password
-ENV DB_NAME=leaderboard
-
-# Expose the API port
-EXPOSE 8000
-
-# Start both MariaDB and FastAPI
-CMD ["/app/start.sh"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD} || exit 1
