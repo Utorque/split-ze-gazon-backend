@@ -33,6 +33,7 @@ services:
       - DB_USER=user
       - DB_PASSWORD=password
       - DB_NAME=leaderboard
+      - API_TOKEN=lolxptdrcetokenesthypersecurehihipdpdpdpdpdlucacaitchipissegranalninitiboule
 
 volumes:
   db_data:

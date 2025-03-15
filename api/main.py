@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Security, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware  # Add this import
 from pydantic import BaseModel
 from typing import Dict, List, Optional
@@ -8,6 +8,11 @@ import os
 import time
 import logging
 from contextlib import contextmanager
+from fastapi.security.api_key import APIKeyHeader
+
+# Define the API key security scheme
+API_TOKEN = os.getenv("API_TOKEN", "")
+api_key_header = APIKeyHeader(name="X-API-Token", auto_error=False)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -77,8 +82,15 @@ app = FastAPI(title="Game Leaderboard API")
 #     allow_headers=["*"],  # Allows all headers
 # )
 
+async def get_api_token(api_key: str = Security(api_key_header)):
+    if not API_TOKEN:
+        raise HTTPException(status_code=500, detail="API token not configured")
+    if api_key != API_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid API token")
+    return api_key
+
 @app.post("/upload_score")
-def upload_score(score_data: ScoreUpload):
+def upload_score(score_data: ScoreUpload, api_token: str = Depends(get_api_token)):
     try:
         with get_db_connection() as connection:
             cursor = connection.cursor(dictionary=True)
