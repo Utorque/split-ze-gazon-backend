@@ -68,24 +68,24 @@ jobs:
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
           
-      # Full Backend Image (Combined)
-      - name: Extract metadata for Full Backend image
-        id: meta-full
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=sha,format=long
-            latest
+      # # Full Backend Image (Combined)
+      # - name: Extract metadata for Full Backend image
+      #   id: meta-full
+      #   uses: docker/metadata-action@v4
+      #   with:
+      #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      #     tags: |
+      #       type=ref,event=branch
+      #       type=ref,event=pr
+      #       type=semver,pattern={{version}}
+      #       type=sha,format=long
+      #       latest
           
-      - name: Build and push Full Backend image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ steps.meta-full.outputs.tags }}
-          labels: ${{ steps.meta-full.outputs.labels }}
+      # - name: Build and push Full Backend image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: .
+      #     file: ./Dockerfile
+      #     push: true
+      #     tags: ${{ steps.meta-full.outputs.tags }}
+      #     labels: ${{ steps.meta-full.outputs.labels }}
